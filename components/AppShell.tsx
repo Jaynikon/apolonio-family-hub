@@ -9,10 +9,14 @@ import {
   Settings,
   ShoppingCart,
   Users,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/browser";
 
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -24,6 +28,7 @@ const navItems = [
   { label: "Tasks", href: "/tasks", icon: CheckSquare },
   { label: "People", href: "/people", icon: Users },
   { label: "Garage", href: "/vehicles", icon: Car },
+  { label: "Accounts", href: "/accounts", icon: ShieldCheck },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -35,6 +40,25 @@ type AppShellProps = {
 
 export function AppShell({ title, subtitle, children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [displayName, setDisplayName] = useState("Family");
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: profile } = await supabase.from("profiles").select("display_name, role").eq("id", data.user.id).maybeSingle();
+      if (profile) { setDisplayName(profile.display_name); setIsAdmin(profile.role === "admin"); }
+    });
+  }, []);
+
+  async function signOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
   const { theme, customColor } = useTheme();
 
   const isLight = theme === "light";
@@ -98,7 +122,7 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
           </div>
 
           <nav className="space-y-2">
-            {navItems.map((item) => {
+            {navItems.filter((item) => item.href !== "/accounts" || isAdmin).map((item) => {
               const Icon = item.icon;
               const isActive =
                 item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -121,6 +145,7 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
               );
             })}
           </nav>
+          <button onClick={signOut} className="mt-6 flex w-full items-center gap-3 rounded-2xl border border-transparent px-4 py-3 text-sm text-slate-300 hover:border-white/10 hover:bg-white/10"><LogOut className="h-5 w-5" />Sign out</button>
         </aside>
 
         <section className="min-w-0 flex-1">
@@ -128,7 +153,7 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
             className={`mb-6 rounded-[2rem] border p-6 shadow-2xl shadow-black/20 backdrop-blur-2xl ${panel}`}
           >
             <p className={isLight ? "text-sm text-slate-600" : "text-sm text-cyan-200"}>
-              Good evening, Jason 👋
+              Welcome back, {displayName} 👋
             </p>
 
             <h1 className="mt-2 bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-5xl font-bold tracking-tight text-transparent">
