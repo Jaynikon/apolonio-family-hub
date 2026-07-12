@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 type DashboardCardProps = {
@@ -19,16 +20,19 @@ export function DashboardCard({
   return (
     <Link
       href={href}
-      className="group block rounded-[2rem] border border-white/10 bg-white/[0.08] p-6 shadow-2xl shadow-black/25 backdrop-blur-2xl transition hover:-translate-y-1 hover:bg-white/[0.12]"
+      className="group relative block overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] p-6 shadow-2xl shadow-black/20 backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.11]"
     >
-      <div
-        className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent} shadow-lg transition group-hover:scale-110`}
-      >
-        <Icon className="h-7 w-7 text-white" />
+      <div className={`absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${accent} opacity-10 blur-2xl transition group-hover:opacity-20`} />
+
+      <div className="relative flex items-start justify-between gap-4">
+        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent} shadow-lg transition duration-300 group-hover:scale-105`}>
+          <Icon className="h-7 w-7 text-white" />
+        </div>
+        <ArrowUpRight className="h-5 w-5 text-slate-500 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-white" />
       </div>
 
-      <h2 className="text-2xl font-bold text-white">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-300">{description}</p>
+      <h2 className="relative mt-5 text-2xl font-bold text-white">{title}</h2>
+      <p className="relative mt-2 text-sm leading-6 text-slate-300">{description}</p>
     </Link>
   );
 }
